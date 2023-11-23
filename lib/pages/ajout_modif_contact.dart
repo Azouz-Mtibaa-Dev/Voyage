@@ -4,6 +4,11 @@ import '../model/contact.model.dart';
 import '../services/contact.service.dart';
 
 class AjoutModifContactPage extends StatefulWidget {
+  AjoutModifContactPage({this.contact, this.modifMode = false});
+
+  final Contact? contact;
+  final bool modifMode;
+
   @override
   State<AjoutModifContactPage> createState() => _AjoutModifContactPageState();
 }
@@ -17,7 +22,9 @@ class _AjoutModifContactPageState extends State<AjoutModifContactPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Page Ajouter/Modifier Contact'),
+        title: Text(widget.modifMode
+            ? 'Page Modifier Contact'
+            : 'Page Ajouter Contact'),
       ),
       body: Form(
         key: globalKey,
@@ -30,12 +37,17 @@ class _AjoutModifContactPageState extends State<AjoutModifContactPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             FormHelper.submitButton(
-              "Ajouter",
+              widget.modifMode ? "Modifier" : "Ajouter",
               () {
                 if (validateAndSave()) {
-                  contactService.ajouterContact(contact!).then((value) {
-                    Navigator.pop(context);
-                  });
+                  if (widget.modifMode)
+                    contactService.modifierContact(contact!).then((value) {
+                      Navigator.pop(context);
+                    });
+                  else
+                    contactService.ajouterContact(contact!).then((value) {
+                      Navigator.pop(context);
+                    });
                 }
               },
               borderRadius: 10,
@@ -55,6 +67,12 @@ class _AjoutModifContactPageState extends State<AjoutModifContactPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.modifMode) contact = widget.contact!;
   }
 
   _formUI() {
@@ -77,7 +95,7 @@ class _AjoutModifContactPageState extends State<AjoutModifContactPage> {
               (onSaved) {
                 contact!.nom = onSaved.toString().trim();
               },
-              initialValue: "",
+              initialValue: widget.modifMode ? contact!.nom! : "",
               showPrefixIcon: true,
               prefixIcon: const Icon(Icons.text_fields),
               borderRadius: 10,
@@ -97,7 +115,7 @@ class _AjoutModifContactPageState extends State<AjoutModifContactPage> {
             }, (onSaved) {
               contact!.tel = int.parse(onSaved.toString().trim());
             },
-                initialValue: "",
+                initialValue: widget.modifMode ? contact !. tel.toString () : "",
                 showPrefixIcon: true,
                 prefixIcon: const Icon(Icons.numbers),
                 borderRadius: 10,

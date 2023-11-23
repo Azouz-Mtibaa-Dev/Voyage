@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -39,7 +40,7 @@ class AuthentificationPage extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 16.0), // Espace entre les champs de texte
+            SizedBox(height: 16.0), // Espace entre les champs de texte
             TextFormField(
               controller: txt_password,
               obscureText: true, // Pour masquer le texte du mot de passe
@@ -51,7 +52,7 @@ class AuthentificationPage extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 16.0), // Espace entre les champs de texte
+            SizedBox(height: 16.0), // Espace entre les champs de texte
             ElevatedButton(
               onPressed: () {
                 // Ajoutez ici la logique pour gérer la connexion
@@ -66,8 +67,8 @@ class AuthentificationPage extends StatelessWidget {
               ),
             ),
             TextButton(
-                child: const Text("Nouvel Utilisateur",
-                    style: TextStyle(fontSize: 22)),
+                child:
+                    Text("Nouvel Utilisateur", style: TextStyle(fontSize: 22)),
                 onPressed: () {
                   Navigator.pop(context);
                   Navigator.pushNamed(context, '/inscription');
@@ -81,17 +82,22 @@ class AuthentificationPage extends StatelessWidget {
   Future<void> _onAuthentifier(BuildContext context) async {
     prefs = await SharedPreferences.getInstance();
     if (!txt_login.text.isEmpty && !txt_password.text.isEmpty) {
-      String log = prefs.getString("login") ?? '';
-      String psw = prefs.getString("password") ?? '';
-      print(txt_password.text);
-      if (txt_login.text == log && txt_password.text == psw) {
-        prefs.setBool("connecte", true);
+      try {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: txt_login.text.trim(), password: txt_password.text.trim());
         Navigator.pop(context);
         Navigator.pushNamed(context, '/home');
-      } else {
-        const snackBar = SnackBar(
-          content: Text('Vérifier votre Id et mot de passe'),
-        );
+      } on FirebaseAuthException catch (e) {
+        SnackBar snackBar = SnackBar(content: Text(""));
+        if (e.code == 'user-not-found') {
+          snackBar = SnackBar(
+            content: Text('Utilisateur inexistant'),
+          );
+        } else if (e.code == 'wrong-password') {
+          snackBar = SnackBar(
+            content: Text('Verifier votre mot de passe'),
+          );
+        }
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     }

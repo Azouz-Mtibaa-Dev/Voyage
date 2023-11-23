@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/global.params.dart';
 
 class MyDrawer extends StatelessWidget {
+  late SharedPreferences prefs;
+
   MyDrawer({Key? key}) : super(key: key);
 
   @override
@@ -17,7 +20,7 @@ class MyDrawer extends StatelessWidget {
             ),
             child: Center(
               child: CircleAvatar(
-                backgroundImage: AssetImage("images/pro.png"),
+                backgroundImage: AssetImage("images/profil.png"),
                 radius: 80,
               ),
             ),
@@ -35,10 +38,9 @@ class MyDrawer extends StatelessWidget {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, item['route'] as String);
                     } else {
-                      final prefs = await SharedPreferences.getInstance();
-                      prefs.setBool("connecte", false);
-                      Navigator.pushNamedAndRemoveUntil(
-                          context, '/authentification', (route) => false);
+                      FirebaseAuth.instance.signOut();
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          '/authentification', (Route<dynamic> route) => false);
                     }
                   },
                 ),
@@ -46,7 +48,7 @@ class MyDrawer extends StatelessWidget {
               ],
             );
           })),
-         ]
+        ],
       ),
     );
   }

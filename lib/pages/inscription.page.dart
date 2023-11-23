@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -81,11 +82,25 @@ class InscriptionPage extends StatelessWidget {
   Future<void> _onInscrire(BuildContext context) async {
     prefs = await SharedPreferences.getInstance();
     if (!txt_login.text.isEmpty && !txt_password.text.isEmpty) {
-      prefs.setString("login", txt_login.text);
-      prefs.setString("password", txt_password.text);
-      prefs.setBool("connecte", true);
-      Navigator.pop(context);
-      Navigator.pushNamed(context, '/authentification');
+      try {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: txt_login.text.trim(), password: txt_password.text.trim());
+        Navigator.pop(context);
+        Navigator.pushNamed(context, '/home');
+      } on FirebaseAuthException catch (e) {
+        SnackBar snackBar = SnackBar(content: Text(""));
+        if (e.code == 'weak-password') {
+          snackBar = SnackBar(
+            content: Text('Mot de passe faible'),
+          );
+        } else if (e.code == 'email-already-in-use') {
+          snackBar = SnackBar(
+            content: Text('Email déjà existant'),
+          );
+        }
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+    } else {
       const snackBar = SnackBar(
         content: Text('Id ou mot de passe vides'),
       );

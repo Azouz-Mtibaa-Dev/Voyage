@@ -21,15 +21,15 @@ class GalleriePage extends StatelessWidget {
             TextFormField(
               controller: txt_gallerie, // Added this line
               decoration: InputDecoration(
-                prefixIcon:
-                    const Icon(Icons.image, size: 30, color: Colors.blue),
+                prefixIcon: Icon(MaterialCommunityIcons.image_multiple,
+                    size: 30, color: Colors.blue),
                 hintText: "Keyword",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
             ),
-            const SizedBox(height: 16.0),
+            SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
                 String keyword = txt_gallerie.text;

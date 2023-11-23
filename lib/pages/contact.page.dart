@@ -1,54 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:snippet_coder_utils/FormHelper.dart';
 import 'package:snippet_coder_utils/list_helper.dart';
 import 'package:voyage/menu/drawer.widget.dart';
-import 'package:snippet_coder_utils/FormHelper.dart';
-import 'package:voyage/model/contact.model.dart';
-import 'package:voyage/services/contact.service.dart';
-import 'ajout_modif_contact.page.dart';
+import '../model/contact.model.dart';
+import '../services/contact.service.dart';
+import 'ajout_modif_contact.dart';
 
 class ContactPage extends StatefulWidget {
-  const ContactPage({super.key});
+  final ContactService contactService = ContactService();
 
   @override
   State<ContactPage> createState() => _ContactPageState();
 }
 
 class _ContactPageState extends State<ContactPage> {
-  ContactService contactService = ContactService();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: MyDrawer(),
       appBar: AppBar(
-        title: const Text('Contact'),
+        title: Text("Contacts"),
       ),
       body: Center(
         child: Column(
           children: [
-            const SizedBox(
-              height: 10,
-            ),
+            SizedBox(height: 10),
             Align(
               alignment: Alignment.centerRight,
               child: FormHelper.submitButton(
                 "Ajout",
-                () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AjoutModifContactPage(),
-                    ),
-                  ).then((value) {
+                    () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return AjoutModifContactPage();
+                  })).then((value) {
                     setState(() {});
                   });
                 },
                 borderRadius: 10,
-                btnColor: Colors.blue,
                 borderColor: Colors.blue,
+                btnColor: Colors.blue,
               ),
             ),
-            const SizedBox(
+            SizedBox(
               height: 10,
             ),
             _fetchData(),
@@ -58,40 +51,97 @@ class _ContactPageState extends State<ContactPage> {
     );
   }
 
-  _fetchData() {
+  Widget _fetchData() {
     return FutureBuilder<List<Contact>>(
-      future: contactService.listeContacts(),
+      future: widget.contactService.listeContacts(),
       builder: (BuildContext context, AsyncSnapshot<List<Contact>> contacts) {
-        if (contacts.hasData) return _buildDataTable(contacts.data!);
-        return const Center(child: CircularProgressIndicator());
+        if (contacts.hasData) {
+          return _buildDataTable(contacts.data!);
+        } else if (contacts.hasError) {
+          return Center(
+            child: Text("Error fetching contacts"),
+          );
+        }
+        return Center(
+          child: CircularProgressIndicator(),
+        );
       },
     );
   }
 
-  _buildDataTable(List<Contact> listContacts) {
+  Widget _buildDataTable(List<Contact> list) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(0.0),
       child: ListUtils.buildDataTable(
         context,
-        ["Nom", "Telephone", "Action"],
+        ["Nom", "Téléphone", "Action"],
         ["nom", "tel", ""],
         false,
         0,
-        listContacts,
-        (Contact c) {
-          // Modifier contact
+        list,
+            (Contact c) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AjoutModifContactPage(
+                modifMode: true,
+                contact: c,
+              ),
+            ),
+          ).then((value) {
+            setState(() {});
+          });
         },
-        (Contact c) {
-          // Supprimer contact
+            (Contact c) {
+          return showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text("Supprimer Contact"),
+                content: const Text("Etes vous sûr de vouloir supprimer ce Contact"),
+                actions: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      FormHelper.submitButton(
+                        "Oui",
+                            () {
+                          widget.contactService.supprimerContact(c).then((value) {
+                            setState(() {
+                              Navigator.of(context).pop();
+                            });
+                          });
+                        },
+                        width: 100,
+                        borderRadius: 5,
+                        btnColor: Colors.green,
+                        borderColor: Colors.green,
+                      ),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      FormHelper.submitButton(
+                        "Non",
+                            () {
+                          Navigator.of(context).pop();
+                        },
+                        width: 100,
+                        borderRadius: 5,
+                      ),
+                    ],
+                  )
+                ],
+              );
+            },
+          );
         },
-        headingRowColor: Colors.orangeAccent,
+        headingRowColor: Colors.orange,
         isScrollable: true,
         columnTextFontSize: 20,
         columnTextBold: false,
         columnSpacing: 50,
-        onSort: (columnIndex, columnName, asc) {
-          // Sorting logic
-        },
+        onSort: (columnIndex, columnName, asc) {},
       ),
     );
   }

@@ -8,10 +8,7 @@ class Contact {
 
   static Contact fromJson(Map<String, dynamic> json) {
     return Contact(
-      id: json['id'],
-      nom: json['nom'].toString(),
-      tel: json['tel'],
-    );
+        id: json['id'], nom: json['nom'].toString(), tel: json['tel']);
   }
 
   Map<String, dynamic> toJson() {

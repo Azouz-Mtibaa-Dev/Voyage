@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:voyage/menu/drawer.widget.dart';
 import 'meteo-details.dart';
 
 class MeteoPage extends StatelessWidget {
@@ -26,9 +25,8 @@ class MeteoPage extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 16.0), // Espace entre les champs de texte
 
-            SizedBox(height: 16.0), // Espace entre les champs de texte
+            SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
                 String username = txt_ville.text;
